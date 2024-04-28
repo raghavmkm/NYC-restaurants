@@ -106,14 +106,14 @@ def get_model_2_data():
     rating_selected_cols = ["Name", "Rating", "Price Category", "ZipCode"]
     rating_df = rating_df[rating_selected_cols].dropna(subset=["Rating", "Price Category", "ZipCode"])
     rating_df["Name"] = rating_df["Name"].str.lower()
-    print(rating_df)
+    # print(rating_df)
     rating_df["Rating"] = round(rating_df["Rating"]).astype(int)
     rating_df["Price Category"] = rating_df["Price Category"].astype(int)
     rating_df["Burough"] = rating_df["ZipCode"].apply(lambda x: get_burough_from_zip(x))
 
     clean_df = rating_df.query('Burough != "BAD"')
     # bad_df = rating_df.query('Burough == "BAD"')
-    print(clean_df)
+    # print(clean_df)
     # print(bad_df)
 
     income_df = pd.read_csv("../data_deliverable/Clean/Median Incomes 2021 Clean.csv") 
@@ -121,9 +121,12 @@ def get_model_2_data():
 
     final_df = pd.merge(left=clean_df, right=income_df, left_on="Burough", right_on="Neighbourhood", how="inner")
     final_df.drop(["Neighbourhood"], inplace=True, axis=1)
+
+    # grouped_count = final_df.groupby("Burough").size()
+    # print(grouped_count)
     final_df = pd.get_dummies(final_df, columns=["Burough"])
     print(final_df)
-    print(final_df.columns)
+    # print(final_df.columns)
 
 
     # violation_df = pd.read_excel("../data_deliverable/Clean/violations clean.xlsx")
@@ -139,6 +142,9 @@ def get_model_2_data():
 
 def model_2():
     df = get_model_2_data()
+    # print(df)
+    # grouped_count = df.groupby("Rating").size()
+    # print(grouped_count)
 
     features = df.drop(["Name", "Rating", "ZipCode"], axis=1)
     target = df["Rating"]
@@ -147,7 +153,7 @@ def model_2():
     X_scaled = scaler.fit_transform(features)
     # X_scaled = features
 
-    X_train, X_test, y_train, y_test = train_test_split(X_scaled, target, test_size=0.1, random_state=37)
+    X_train, X_test, y_train, y_test = train_test_split(X_scaled, target, test_size=0.9, random_state=37)
     k = 5
     knn = KNeighborsClassifier(n_neighbors=k)
 
@@ -176,18 +182,7 @@ def model_2():
     return knn
 
 
-
-
-
-
-
-    
-
-
-
-
-
 if __name__ == "__main__":
-    # model_1()
+    model_1()
     model_2()
 
