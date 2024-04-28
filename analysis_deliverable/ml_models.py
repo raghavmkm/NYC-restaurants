@@ -107,7 +107,7 @@ def get_model_2_data():
     rating_df = rating_df[rating_selected_cols].dropna(subset=["Rating", "Price Category", "ZipCode"])
     rating_df["Name"] = rating_df["Name"].str.lower()
     # print(rating_df)
-    rating_df["Rating"] = round(rating_df["Rating"]).astype(int)
+    # rating_df["Rating"] = round(rating_df["Rating"]).astype(int)
     rating_df["Price Category"] = rating_df["Price Category"].astype(int)
     rating_df["Burough"] = rating_df["ZipCode"].apply(lambda x: get_burough_from_zip(x))
 
@@ -153,14 +153,14 @@ def model_2():
     X_scaled = scaler.fit_transform(features)
     # X_scaled = features
 
-    X_train, X_test, y_train, y_test = train_test_split(X_scaled, target, test_size=0.9, random_state=37)
-    k = 5
+    X_train, X_test, y_train, y_test = train_test_split(X_scaled, target, test_size=0.2, random_state=37, shuffle=True)
+    k = 10
     knn = KNeighborsClassifier(n_neighbors=k)
 
     knn.fit(X_train, y_train)
 
     # cross validation
-    cv_scores = cross_val_score(knn, X_scaled, target, cv=7)  # 10-fold cross-validation
+    cv_scores = cross_val_score(knn, X_scaled, target, cv=10)  # 10-fold cross-validation
 
     print("Cross-Validation Scores:", cv_scores)
     print("Mean Cross-Validation Score:", cv_scores.mean())
@@ -171,13 +171,6 @@ def model_2():
     # evaluate performance
     accuracy = accuracy_score(y_test, y_pred)
     print("Accuracy on Test Set:", accuracy)
-
-    # show more evaluation stuff
-    print("Classification Report:")
-    print(classification_report(y_test, y_pred))
-
-    print("Confusion Matrix:")
-    print(confusion_matrix(y_test, y_pred))
 
     return knn
 
