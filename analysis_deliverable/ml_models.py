@@ -7,6 +7,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import numpy as np
+from fuzzywuzzy import process
 
 
 def get_model_1_data():
@@ -21,7 +22,7 @@ def get_model_1_data():
     income_df.rename(columns={"Median Household Income 2021": "MEDIAN_INCOME"}, inplace=True)
 
     # categorical columns we will one hot encode
-    columns_to_one_hot = ["BORO", "CUISINE DESCRIPTION", "Community Board", "Council District", "Census Tract"]
+    columns_to_one_hot = ["BORO", "CUISINE DESCRIPTION", "Community Board"]
     # static columns we won't change but want to keep
     static_columns = ["DBA", "CRITICAL"]
 
@@ -107,7 +108,7 @@ def get_model_2_data():
     rating_df = rating_df[rating_selected_cols].dropna(subset=["Rating", "Price Category", "ZipCode"])
     rating_df["Name"] = rating_df["Name"].str.lower()
     # print(rating_df)
-    # rating_df["Rating"] = round(rating_df["Rating"]).astype(int)
+    rating_df["Rating"] = round(rating_df["Rating"]).astype(int)
     rating_df["Price Category"] = rating_df["Price Category"].astype(int)
     rating_df["Burough"] = rating_df["ZipCode"].apply(lambda x: get_burough_from_zip(x))
 
@@ -158,6 +159,7 @@ def model_2():
     knn = KNeighborsClassifier(n_neighbors=k)
 
     knn.fit(X_train, y_train)
+    
 
     # cross validation
     cv_scores = cross_val_score(knn, X_scaled, target, cv=10)  # 10-fold cross-validation
@@ -172,10 +174,40 @@ def model_2():
     accuracy = accuracy_score(y_test, y_pred)
     print("Accuracy on Test Set:", accuracy)
 
-    return knn
+    return knn, scaler
+
+def get_recommendations(restaurant_name: str, model, scaler, num_neigh = 4):
+    cleaned_name = restaurant_name.lower()
+    data = get_model_2_data()
+
+    restaurant_names = data['Name'].tolist()
+    
+    # Use fuzzywuzzy to find the closest match
+    closest_match = process.extractOne(restaurant_name, restaurant_names)
+    
+    # closest_match is a tuple (closest_name, score), we need the closest_name
+    closest_name = closest_match[0]
+    print(closest_name)
+    
+    # Find the row in the DataFrame that matches the closest name
+    closest_row = data[data['Name'] == closest_name]
+    closest_row = closest_row.drop(["Name", "Rating", "ZipCode"], axis=1)
+    scaled = scaler.transform(closest_row)
+
+    distances, indices = model.kneighbors(scaled, n_neighbors=num_neigh)
+    
+    # Get the names of the k nearest restaurants
+    nearest_restaurants = data.iloc[indices[0]][['Name', 'Rating', 'Price Category', 'ZipCode']]
+
+    print(nearest_restaurants)
+    return nearest_restaurants
+
+
 
 
 if __name__ == "__main__":
-    model_1()
-    model_2()
+    # model_1()
+    print("model2")
+    model2, scaler = model_2()
+    # get_recommendations("avenue", model2, scaler)
 
