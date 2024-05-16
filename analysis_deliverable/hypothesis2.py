@@ -20,8 +20,10 @@ def test_hypothesis():
     alpha = 0.05  # significance level
     if pval < alpha:
         print("We can reject the Null Hypothesis")
+        print(pval)
     else:
         print("We cannot reject the Null Hypothesis")
+        print(pval)
 
 def main():
     test_hypothesis()

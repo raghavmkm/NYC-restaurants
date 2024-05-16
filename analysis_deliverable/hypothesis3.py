@@ -37,8 +37,10 @@ def test_hypothesis():
     print("P-value:", p_val)
     if p_val < alpha:
         print("We can reject the Null Hypothesis")
+        print(p_val)
     else:
         print("We cannot reject the Null Hypothesis")
+        print(p_val)
 
 
 def main():

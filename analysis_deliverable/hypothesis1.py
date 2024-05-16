@@ -1,9 +1,11 @@
 import pandas as pd
 import numpy as np
 
+
 #Here we are working on the Kaggle dataset and we are trying to test the following hypothesis:
 # Ho - There is no significant difference in the ratings of restaurants in the highest price category
 # Ha - There is a significant difference in the ratings of restaurants in the highest price category
+
 
 def test_hypothesis():
     df = pd.read_csv("../data_deliverable/Clean/Cleaned Restaurant data.csv")
@@ -17,8 +19,10 @@ def test_hypothesis():
     z = z.iloc[0]
     if(z > 1.96 or z < -1.96):
         print("We can reject the Null Hypothesis")
+        print(z)
     else:
         print("We cannot reject the Null Hypothesis")
+        print(z)
 
 
 def main():
